@@ -1,0 +1,34 @@
+# This signifies that it is a yml file
+---
+# This name is gonna appear in the github actions
+name: Checks
+
+# This is the trigger. We want to run the jobs when we push to github
+on: [push]
+
+jobs:
+  # Define a new job with test-lint id
+  test-lint:
+    # Name within github interface
+    name: Test and Lint
+    # Runner where we are gonna run our project on
+    runs-on: ubuntu-20.04
+    # Steps are different things that run for the job
+    steps:
+        # name that we want to give to this particular step
+      - name: Login to Docker Hub
+        # Allows you to use pre-made actions(docker container for particular task)
+        # This action used to log in to docker. @ is the version that we use.
+        uses: docker/login-action@v1
+        # Pass the parameters
+        with:
+          username: ${{ secrets.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      # Action that checks our code out inside our github actions job
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Test
+        # Command for running unit test for our project
+        run: docker compose run --rm app sh -c "python manage.py test"
+      - name: Lint
+        run: docker compose run --rm app -c "flake8"
